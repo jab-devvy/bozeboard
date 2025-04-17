@@ -1,0 +1,4 @@
+pb/pb_data/
+venv/
+__pycache__/
+*.log

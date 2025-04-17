@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Screen Saver</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* More modern font */
+            background-color: #1a1a1a; /* Darker background */
+            color: #f0f0f0; /* Lighter text */
+            text-align: center;
+            padding-top: 80px; /* More top padding */
+            margin: 0; /* Remove default body margin */
+        }
+        .datetime {
+            font-size: 2.5em; /* Slightly larger date/time */
+            margin-bottom: 30px;
+            opacity: 0.9; /* Slightly less intense color */
+        }
+        .message-container {
+            margin-top: 60px;
+            padding: 20px;
+            border: 1px solid #444; /* Thin, dark border */
+            border-radius: 8px; /* Slightly rounded corners */
+            display: inline-block; /* Adjust width to content */
+            max-width: 80%; /* Limit maximum width */
+        }
+        .message {
+            font-size: 3.5em; /* Larger message text */
+            word-break: break-word; /* Prevent overflow */
+        }
+    </style>
+</head>
+<body>
+    <div class="datetime">
+        <span id="day"></span>, <span id="date"></span> <span id="time"></span>
+    </div>
+    <div class="message-container">
+        <div class="message" id="latest-message-display">
+            </div>
+    </div>
+
+    <script>
+        const messageDisplay = document.getElementById('latest-message-display');
+
+        function updateDateTime() {
+            const now = new Date();
+            const dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long' });
+            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = now.toLocaleDateString('en-US', dateOptions);
+            const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
+            document.getElementById('day').textContent = dayOfWeek;
+            document.getElementById('date').textContent = formattedDate;
+            document.getElementById('time').textContent = time;
+        }
+
+        function fetchLatestMessage() {
+            fetch('/latest_message')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        messageDisplay.textContent = data.message;
+                    } else if (data.error) {
+                        console.error("Error fetching latest message:", data.error);
+                        messageDisplay.textContent = "Error loading message."; // Display an error message
+                    } else {
+                        messageDisplay.textContent = ""; // Clear the message if no message is available
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching latest message:", error);
+                    messageDisplay.textContent = "Error loading message."; // Display an error message
+                });
+        }
+
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        setInterval(fetchLatestMessage, 5000);
+        fetchLatestMessage();
+    </script>
+</body>
+</html>
